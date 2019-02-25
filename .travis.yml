@@ -15,11 +15,11 @@ jobs:
       deploy:
         - name: 'deploy (script, tags = true)'
           provider: script
-          script:  'echo "=====***** provider script: ok"'
+          script:  'echo "=====***** provider script: ok (tags = true)"'
           on:
             tags: true
         - name: 'Deploy (script, tags = false)'
           provider: script
-          script:  'echo "=====***** provider script: OK"'
+          script:  'echo "=====***** provider script: OK (tags = false)"'
           on:
             tags: false
