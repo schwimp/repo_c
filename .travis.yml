@@ -1,0 +1,25 @@
+jobs:
+  include:
+    - stage: spec
+      script:
+        - 'echo "===== job script: OK"'
+
+    - stage: acceptance
+      script:
+        - 'echo "===== job script: OK"'
+
+    - stage: deploy
+      if: 'fork = false AND tag IS present'
+      script:
+        - 'echo "===== job script: OK"'
+      deploy:
+        - name: 'deploy (script, tags = true)'
+          provider: script
+          script:  'echo "=====***** provider script: ok"'
+          on:
+            tags: true
+        - name: 'Deploy (script, tags = false)'
+          provider: script
+          script:  'echo "=====***** provider script: OK"'
+          on:
+            tags: false
