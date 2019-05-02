@@ -1,25 +1,30 @@
+stages:
+  - validate
+  - name: deploy
+    if: tag IS present
+
 jobs:
   include:
-    - stage: spec
-      script:
-        - 'echo "===== job script: OK"'
-
-    - stage: acceptance
-      script:
-        - 'echo "===== job script: OK"'
-
-    - stage: deploy
-      if: 'fork = false AND tag IS present'
-      script:
-        - 'echo "===== job script: OK"'
-      deploy:
-        - name: 'deploy (script, tags = true)'
-          provider: script
-          script:  'echo "=====***** provider script: ok (tags = true)"'
-          on:
-            tags: true
-        - name: 'Deploy (script, tags = false)'
-          provider: script
-          script:  'echo "=====***** provider script: OK (tags = false)"'
-          on:
-            tags: false
+  - stage: validate
+    name: validate GitHub OAuth token has sufficient scope to release
+    script:
+    - echo "===== OAuth token validation"
+    - OWNER="$(echo $TRAVIS_REPO_SLUG | cut -d/ -f1)"
+    - echo $TRAVIS_SECURE_ENV_VARS
+    - 'curl -H "Authorization: token ${GITHUB_OAUTH_TOKEN}" "https://api.github.com/users/$OWNER"
+      -I | grep ^X-OAuth-Scopes | egrep -w "repo|public_repo" '
+  - stage: deploy
+    script:
+    - 'echo "===== job script: OK"'
+    deploy:
+    - name: deploy (script, tags = true)
+      provider: script
+      script: 'echo "=====***** provider script: ok (tags = true)"'
+      on:
+        tags: true
+    - provider: releases
+      api_key: $GITHUB_OAUTH_TOKEN
+      skip_cleanup: true
+      on:
+        tags: true
+        condition: "($SKIP_FORGE_PUBLISH != true)"
